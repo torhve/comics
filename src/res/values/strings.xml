@@ -1,0 +1,7 @@
+<resources>
+
+    <string name="app_name">Comics</string>
+    <string name="title_comic_detail">Comic Detail</string>
+    <string name="title_comic_list">Strips</string>
+
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <EditTextPreference android:summary="Get this from your account on the webpage" android:key="apikey" android:title="API key"/>
+    
+
+</PreferenceScreen>

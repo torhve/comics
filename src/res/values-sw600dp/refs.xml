@@ -1,0 +1,3 @@
+<resources>
+    <item type="layout" name="activity_comic_list">@layout/activity_comic_twopane</item>
+</resources>

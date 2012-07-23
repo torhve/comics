@@ -1,0 +1,9 @@
+eclipse-ws
+.classpath
+.project
+bin
+gen
+libs
+project.properties
+proguard-project.txt
+
