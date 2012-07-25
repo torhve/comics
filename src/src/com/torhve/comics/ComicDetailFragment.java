@@ -57,14 +57,7 @@ public class ComicDetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_comic_detail, container, false);
-        imageView = ((ImageView) rootView.findViewById(R.id.comic_detail));
-        if (comiclist != null) {
-            new DownloadImageTask((ImageView)imageView).execute(comiclist.get(0).get("file"));
-        }
-            
-
-            //((TextView) rootView.findViewById(R.id.comic_detail)).setText(comiclist.get(0).get("file"));
-        
+        imageView = ((ImageView) rootView.findViewById(R.id.comic_detail));      
         return rootView;
     }
     private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
