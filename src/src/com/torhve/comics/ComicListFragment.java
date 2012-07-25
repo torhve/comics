@@ -9,26 +9,28 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.torhve.comics.backend.ComicBackend;
 import com.torhve.comics.backend.JasonHandler;
-import com.torhve.comics.dummy.DummyContent;
 
 public class ComicListFragment extends ListFragment {
 
     private static final String STATE_ACTIVATED_POSITION = "activated_position";
 
+	public static final String TAG = "ComicListFragment";
+
     private Callbacks mCallbacks = sComicCallbacks;
     private int mActivatedPosition = ListView.INVALID_POSITION;
+
+	public ArrayList<HashMap<String, String>> comiclist;
     
 
     public interface Callbacks {
@@ -51,7 +53,6 @@ public class ComicListFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        new FetchAndUpdate().execute("https://comics.io/api/v1/comics/?format=json&my=true&"+ ((ComicListActivity)getActivity()).getApiKey());
 
     }
 
@@ -61,7 +62,7 @@ public class ComicListFragment extends ListFragment {
         if (savedInstanceState != null && savedInstanceState
                 .containsKey(STATE_ACTIVATED_POSITION)) {
             setActivatedPosition(savedInstanceState.getInt(STATE_ACTIVATED_POSITION));
-        }        
+        }       
 
     }
 
@@ -73,6 +74,12 @@ public class ComicListFragment extends ListFragment {
         }
 
         mCallbacks = (Callbacks) activity;
+        String apikey = ((ComicListActivity) activity).getApiKey();
+        String baseurl = ((ComicListActivity) activity).getBaseUrl();
+
+        if(apikey!=null && baseurl != null)
+        	new FetchAndUpdate().execute(baseurl + "/api/v1/comics/?format=json&my=true&key=" + apikey);
+
     }
 
     @Override
@@ -85,7 +92,8 @@ public class ComicListFragment extends ListFragment {
     public void onListItemClick(ListView listView, View view, int position, long id) {
         super.onListItemClick(listView, view, position, id);
         //mCallbacks.onItemSelected(ComicBackend..get(position).id);
-        mCallbacks.onItemSelected(ComicBackend.get(id));
+    	String cid = ((String) comiclist.get(position).get("id"));
+        mCallbacks.onItemSelected(cid);
     }
 
     @Override
@@ -111,9 +119,10 @@ public class ComicListFragment extends ListFragment {
 
         mActivatedPosition = position;
     }
-    private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<String>> {
-		protected ArrayList<String> doInBackground(String... params) {
-        	
+
+    private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
+		protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
+			Log.d("JSON fetching URL:", params[0]);
         	
         	 /*
             setListAdapter(new ArrayAdapter<ComicContent.ComicItem>(getActivity(),
@@ -121,8 +130,8 @@ public class ComicListFragment extends ListFragment {
                     R.id.text1,
                     ComicContent.ITEMS));
                     */
-        	ArrayList<HashMap<String, String>> mylist = new ArrayList<HashMap<String, String>>();
-        	ArrayList<String> mylist2 = new ArrayList<String>();
+        	comiclist = new ArrayList<HashMap<String, String>>();
+        	//ArrayList<long<String>> mylist2 = new ArrayList<long<String>>();
 
         	//Get the data (see above)
         	JSONObject json =
@@ -139,7 +148,11 @@ public class ComicListFragment extends ListFragment {
         	        for(int i=0;i < comics.length();i++){						
         	        	JSONObject c = comics.getJSONObject(i);
 
-        	        	mylist2.add(c.getString("name"));
+        	        	HashMap<String, String> map = new HashMap<String, String>();
+        	        	map.put("id",  c.getString("id"));
+        	        	map.put("name", c.getString("name"));
+
+        	        	comiclist.add(map);
 
         	        	/*HashMap<String, String> map = new HashMap<String, String>();
         	        	JSONObject e = earthquakes.getJSONObject(i);
@@ -151,11 +164,15 @@ public class ComicListFragment extends ListFragment {
         	        }
 
         	       }catch(JSONException e)        {
-        	       	 Log.e("log_tag", "Error parsing data "+e.toString());
+        	       	 Log.e(TAG, "Error parsing data "+e.toString());
         	       }catch(NullPointerException e) {
-        	    	   Log.e("log_tag", "null from json "+e.toString());
+        	    	   
+        	    	 Log.e(TAG, "null from json "+e.toString());
+                     Context context = ComicListFragment.this.getActivity().getApplicationContext();
+
+        	    	 Toast.makeText(context, "Error fetching data!", Toast.LENGTH_SHORT).show();
         	       }
-		return mylist2;
+           		return comiclist;
 
     		    /*ListAdapter adapter = new SimpleAdapter(this, mylist , R.layout.simple_list_item_activated_1,
     		            new String[] { "name" },
@@ -180,13 +197,15 @@ public class ComicListFragment extends ListFragment {
             setProgressPercent(progress[0]);
         }*/
 
-        protected void onPostExecute(ArrayList<String> mylist2) {
-                    Context context = ComicListFragment.this.getActivity().getApplicationContext();
-            	    setListAdapter(new ArrayAdapter<String>(context,
-        	                android.R.layout.simple_list_item_activated_1,
-        	                android.R.id.text1,
-        	                mylist2));
-
+        protected void onPostExecute(ArrayList<HashMap<String, String>> mylist) {
+        	ArrayList<String> clist = new ArrayList<String>();
+        	for(HashMap hm: mylist) {
+        		clist.add((String) hm.get("name"));
+        	}
+            Context context = ComicListFragment.this.getActivity().getApplicationContext();
+    	    setListAdapter(new ArrayAdapter<String>(context,
+	                R.layout.simple_list,
+	                clist));
         }
     }
 

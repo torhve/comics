@@ -1,9 +1,20 @@
 package com.torhve.comics;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.torhve.comics.backend.JasonHandler;
+
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
@@ -11,30 +22,31 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class ComicListActivity extends FragmentActivity
         implements ComicListFragment.Callbacks {
 
-    private boolean mTwoPane;
+	private boolean mTwoPane;
 	private String APIKEY;
+    private String BASEURL;
+
 	private final String TAG = "ComicListActivity";
+	protected SharedPreferences prefs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_comic_list);
+        
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        APIKEY = prefs.getString("apikey", null);
+        BASEURL = prefs.getString("urlbase", null);
 
-        if (findViewById(R.id.comic_detail_container) != null) {
-            mTwoPane = true;
-            ((ComicListFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.comic_list))
-                    .setActivateOnItemClick(true);
-        }
-       
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        APIKEY = prefs.getString("apikey", "");
         Log.d(TAG, "APIKEY:" + APIKEY); 
+        Log.d(TAG, "BASEURL:" + BASEURL); 
+
 
         if (APIKEY.equals("")) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -56,11 +68,20 @@ public class ComicListActivity extends FragmentActivity
             builder.create().show();
 
         }
+        setContentView(R.layout.activity_comic_list);
 
+        
+        if (findViewById(R.id.comic_detail_container) != null) {
+            mTwoPane = true;
+            ((ComicListFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.comic_list))
+                    .setActivateOnItemClick(true);
+        }
     }
 
     @Override
     public void onItemSelected(String id) {
+    	Log.d(TAG, "onItemSelected:"+id);
         if (mTwoPane) {
             Bundle arguments = new Bundle();
             arguments.putString(ComicDetailFragment.ARG_ITEM_ID, id);
@@ -97,6 +118,10 @@ public class ComicListActivity extends FragmentActivity
     }
     
     public String getApiKey() { return this.APIKEY; }
+
+	public String getBaseUrl() {
+		return this.BASEURL;
+	}
 
 
 }

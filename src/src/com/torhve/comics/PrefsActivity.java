@@ -31,7 +31,8 @@ public class PrefsActivity extends PreferenceActivity {
         return false;
     }
  
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void onCreate(Bundle aSavedState) {
         //onBuildHeaders() will be called during super.onCreate()
         try {

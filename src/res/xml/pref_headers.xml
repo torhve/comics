@@ -24,7 +24,7 @@
     android:title="About Comics"
     android:summary="link to info">
     <intent android:action="android.intent.action.VIEW"
-	android:data="https://comics.io/help/" />
+	android:data="https://github.com/torhve/comics/" />
 </header>
  
 </preference-headers>

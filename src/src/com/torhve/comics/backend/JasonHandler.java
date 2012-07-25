@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import android.util.Log;
  
 public class JasonHandler  {
+	private static final String TAG = "JasonHandler";
   
 	public static JSONObject getJSONfromURL(String url){
 		
@@ -40,12 +41,12 @@ public class JasonHandler  {
 			HttpEntity entity = response.getEntity();
 			is = entity.getContent();
 		}catch(Exception e){
-			Log.d("log_tag", "Error in http connection "+e.toString());
+			Log.d(TAG, "Error in http connection "+e.toString());
 		}
 
 		//convert response to string
 		try{
-			BufferedReader reader = new BufferedReader(new InputStreamReader(is,"UTF-8"),8);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"),8);
 			StringBuilder sb = new StringBuilder();
 			String line = null;
 			while ((line = reader.readLine()) != null) {
@@ -54,7 +55,7 @@ public class JasonHandler  {
 			is.close();
 			result=sb.toString();
 		}catch(Exception e){
-			Log.d("log_tag", "Error converting result "+e.toString());
+			Log.d(TAG, "Error converting result "+e.toString());
 		}
 
 		//try parse the string to a JSON object
@@ -62,7 +63,7 @@ public class JasonHandler  {
 	        	jArray = new JSONObject(result);
 	        	
 		}catch(JSONException e){
-			Log.d("log_tag", "Error parsing data "+e.toString());
+			Log.d(TAG, "Error parsing data "+e.toString());
 		}
 
 		return jArray;
