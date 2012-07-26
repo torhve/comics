@@ -16,25 +16,27 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.torhve.comics.backend.JasonHandler;
 
-public class ComicDetailFragment extends Fragment {
+public class ComicDetailFragment extends Fragment implements OnClickListener {
 
     public static final String ARG_ITEM_ID = "item_id";
-
+    private int currentPosition = 0;
 	public static final String TAG = "ComicDetailFragment";
-
-    JSONObject mItem;
-
 	public ArrayList<HashMap<String, String>> comiclist;
+	public String nextUrl;
+	protected String baseurl;
 
-	
-
-	
-	public View imageView;
+	protected View imageView;
+	protected View rootView;
+	private TextView titleView;
+	private TextView infoView;
+	private TextView dateView;
 
     public ComicDetailFragment() {
     }
@@ -44,20 +46,28 @@ public class ComicDetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments().containsKey(ARG_ITEM_ID)) {
             String APIKEY = ((ComicListActivity) getActivity()).getApiKey();
-            String baseurl = ((ComicListActivity) getActivity()).getBaseUrl();
+            baseurl = ((ComicListActivity) getActivity()).getBaseUrl();
             String itemId = getArguments().getString(ARG_ITEM_ID);
             if(APIKEY!=null && baseurl != null)
             	new FetchAndUpdate().execute(baseurl + "/api/v1/releases/?format=json&my=true&key=" + APIKEY + "&comic=" + itemId);
-
-            //mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_comic_detail, container, false);
-        imageView = ((ImageView) rootView.findViewById(R.id.comic_detail));      
+        rootView = inflater.inflate(R.layout.fragment_comic_detail, container, false);
+        imageView = ((ImageView) rootView.findViewById(R.id.comic_image));
+        titleView = ((TextView) rootView.findViewById(R.id.comic_title));
+        dateView = ((TextView) rootView.findViewById(R.id.comic_date));
+        infoView = ((TextView) rootView.findViewById(R.id.comic_info));
+        
+        // Empty the sample strings
+        titleView.setText("");
+        infoView.setText("");
+        dateView.setText("");
+
+        imageView.setOnClickListener(this);
         return rootView;
     }
     private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
@@ -74,6 +84,7 @@ public class ComicDetailFragment extends Fragment {
            try{
         		//Get the element that holds the earthquakes ( JSONArray )
         	   Log.d("JSON", json.toString());
+        	   ComicDetailFragment.this.nextUrl = json.getJSONObject("meta").getString("next");
         	   JSONArray comics = json.getJSONArray("objects");
 
         		   //Loop the Array
@@ -84,10 +95,13 @@ public class ComicDetailFragment extends Fragment {
         	        	HashMap<String, String> map = new HashMap<String, String>();
         	        	map.put("id",  c.getString("id"));
         	        	map.put("pub_date", c.getString("pub_date"));
+        	        	
         	        	map.put("file", iobj.getString("file"));
+        	        	map.put("title", iobj.getString("title"));
+        	        	map.put("text", iobj.getString("text"));
+
         	        	comiclist.add(map);
         	        }
-
         	       }catch(JSONException e)        {
         	       	 Log.e(TAG, "Error parsing data "+e.toString());
         	       }catch(NullPointerException e) {
@@ -96,16 +110,43 @@ public class ComicDetailFragment extends Fragment {
            		return comiclist;
            }
 
-
         /*protected void onProgressUpdate(Integer... progress) {
             setProgressPercent(progress[0]);
         }*/
 
         protected void onPostExecute(ArrayList<HashMap<String, String>> mylist) {
-                new DownloadImageTask((ImageView) imageView).execute(mylist.get(0).get("file"));
+        	ComicDetailFragment.this.getAndSetNextImage(mylist);
+                
         }
     }
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+    public void getAndSetNextImage(ArrayList<HashMap<String, String>> mylist) {
+    	// Get the current HashMap
+    	try {
+			HashMap<String, String> hm = mylist.get(currentPosition);
+			String imgurl = hm.get("file");
+		
+			// Fetch image and update image view
+			new DownloadImageTask((ImageView) imageView).execute(imgurl);
+		
+		    titleView.setText(hm.get("title"));        
+		    infoView.setText(hm.get("text"));
+		    dateView.setText(hm.get("pub_date"));
+		    
+			if(currentPosition+1 < mylist.size()) {
+				// TODO fetch more
+				this.currentPosition++;
+			}else { 
+		    	new FetchAndUpdate().execute(baseurl + nextUrl);
+		    	currentPosition = 0;
+		    }
+    	}catch(IndexOutOfBoundsException e) {
+    		// Probably during update of new list
+    		Log.d(TAG, e.toString());
+    		Log.d(TAG, "Position:"+currentPosition+",size:"+mylist.size());
+    	}
+
+	}
+	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 		ImageView bmImage;
 
     	public DownloadImageTask(ImageView bmImage) {
@@ -130,5 +171,9 @@ public class ComicDetailFragment extends Fragment {
     	}
 	   	
     }
+	@Override
+	public void onClick(View arg0) {
+		this.getAndSetNextImage(comiclist);
+	}
  }
 

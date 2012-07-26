@@ -1,30 +1,18 @@
 package com.torhve.comics;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.torhve.comics.backend.JasonHandler;
-
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Toast;
 
 public class ComicListActivity extends FragmentActivity
         implements ComicListFragment.Callbacks {
@@ -48,7 +36,7 @@ public class ComicListActivity extends FragmentActivity
         Log.d(TAG, "BASEURL:" + BASEURL); 
 
 
-        if (APIKEY.equals("")) {
+        if (APIKEY == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Please enter your API key");
             final EditText text = new EditText(this);
@@ -82,9 +70,10 @@ public class ComicListActivity extends FragmentActivity
     @Override
     public void onItemSelected(String id) {
     	Log.d(TAG, "onItemSelected:"+id);
+        Bundle arguments = new Bundle();
+        arguments.putString(ComicDetailFragment.ARG_ITEM_ID, id);
+
         if (mTwoPane) {
-            Bundle arguments = new Bundle();
-            arguments.putString(ComicDetailFragment.ARG_ITEM_ID, id);
             ComicDetailFragment fragment = new ComicDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction()
@@ -92,9 +81,15 @@ public class ComicListActivity extends FragmentActivity
                     .commit();
 
         } else {
-            Intent detailIntent = new Intent(this, ComicDetailActivity.class);
-            detailIntent.putExtra(ComicDetailFragment.ARG_ITEM_ID, id);
-            startActivity(detailIntent);
+            //Intent detailIntent = new Intent(this, ComicDetailActivity.class);
+            //detailIntent.putExtra(ComicDetailFragment.ARG_ITEM_ID, id);
+            //startActivity(detailIntent);
+        	ComicDetailFragment fragment = new ComicDetailFragment();
+            fragment.setArguments(arguments);
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.comic_list, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
         
 
