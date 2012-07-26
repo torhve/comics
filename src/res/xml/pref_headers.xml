@@ -6,7 +6,7 @@
     android:title="Account settings" >
     <extra android:name="pref-resource" android:value="app_prefs_cat1" />
 </header>        
- 
+ <!-- 
 <header android:fragment="com.torhve.comics.PrefsActivity$PrefsFragment" 
     android:icon="@android:drawable/ic_menu_gallery"
     android:title="Screen 2 prefs" >
@@ -17,14 +17,22 @@
     android:icon="@android:drawable/ic_menu_edit"
     android:title="Screen 3 prefs" >
     <extra android:name="pref-resource" android:value="app_prefs_cat3" />
-</header>
+</header> -->
  
 <header
     android:icon="@drawable/ic_launcher"
     android:title="About Comics"
-    android:summary="link to info">
+    android:summary="link to github project">
     <intent android:action="android.intent.action.VIEW"
 	android:data="https://github.com/torhve/comics/" />
 </header>
+<header
+    android:icon="@drawable/ic_launcher"
+    android:title="Mail author"
+    android:summary="Click to send email">
+    <intent android:action="android.intent.action.VIEW"
+	android:data="mailto:torhveem@gmail.com" />
+</header>
+
  
 </preference-headers>

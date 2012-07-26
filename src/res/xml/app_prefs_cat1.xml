@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <EditTextPreference android:summary="Base URL of the web site" android:key="urlbase" android:title="URL base"/>
+    <EditTextPreference android:summary="Base URL of the web site ( e.g. https://mycomicssite.com/ )" android:key="urlbase" android:title="URL base"/>
     <EditTextPreference android:summary="Get this from your account on the webpage" android:key="apikey" android:title="API key"/>
 </PreferenceScreen>
