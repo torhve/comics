@@ -3,13 +3,10 @@ package com.torhve.comics;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
   
 public class PrefsActivity extends PreferenceActivity {
     protected Method mLoadHeaders = null;

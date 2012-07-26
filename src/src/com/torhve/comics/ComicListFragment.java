@@ -1,5 +1,7 @@
 package com.torhve.comics;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -16,9 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import com.torhve.comics.backend.ComicBackend;
 import com.torhve.comics.backend.JasonHandler;
 
 public class ComicListFragment extends ListFragment {
@@ -122,84 +121,55 @@ public class ComicListFragment extends ListFragment {
 
     private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
 		protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
+			URL url = null;
 			Log.d("JSON fetching URL:", params[0]);
-        	
-        	 /*
-            setListAdapter(new ArrayAdapter<ComicContent.ComicItem>(getActivity(),
-                    R.layout.simple_list_item_activated_1,
-                    R.id.text1,
-                    ComicContent.ITEMS));
-                    */
+			   try {
+				url = new URL(params[0]);
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				Log.d("MalformedRL:", e1.toString());
+			}
         	comiclist = new ArrayList<HashMap<String, String>>();
-        	//ArrayList<long<String>> mylist2 = new ArrayList<long<String>>();
 
         	//Get the data (see above)
         	JSONObject json =
-        		JasonHandler.getJSONfromURL(params[0]);
+        		JasonHandler.getJSONfromURL(url);
 
            try{
-        		//Get the element that holds the earthquakes ( JSONArray )
         	   Log.d("JSON", json.toString());
-               //JSONArray parsedArray = new JSONArray(json.toString());
-               //JSONArray pics = parsedArray.getJSONObject(0).getJSONObject("data").getJSONArray("children");
         	   JSONArray comics = json.getJSONArray("objects");
 
-        		   //Loop the Array
-        	        for(int i=0;i < comics.length();i++){						
-        	        	JSONObject c = comics.getJSONObject(i);
+    	        for(int i=0;i < comics.length();i++){						
+    	        	JSONObject c = comics.getJSONObject(i);
 
-        	        	HashMap<String, String> map = new HashMap<String, String>();
-        	        	map.put("id",  c.getString("id"));
-        	        	map.put("name", c.getString("name"));
+    	        	HashMap<String, String> map = new HashMap<String, String>();
+    	        	map.put("id",  c.getString("id"));
+    	        	map.put("name", c.getString("name"));
 
-        	        	comiclist.add(map);
+    	        	comiclist.add(map);
 
-        	        	/*HashMap<String, String> map = new HashMap<String, String>();
-        	        	JSONObject e = earthquakes.getJSONObject(i);
+    	        	/*HashMap<String, String> map = new HashMap<String, String>();
+    	        	JSONObject e = earthquakes.getJSONObject(i);
 
-        	        	map.put("id",  String.valueOf(i));
-        	        	map.put("name", "Earthquake name:" + e.getString("eqid"));
-        	        	map.put("magnitude", "Magnitude: " +  e.getString("magnitude"));
-        	        	mylist.add(map);*/
-        	        }
+    	        	map.put("id",  String.valueOf(i));
+    	        	map.put("name", "Earthquake name:" + e.getString("eqid"));
+    	        	map.put("magnitude", "Magnitude: " +  e.getString("magnitude"));
+    	        	mylist.add(map);*/
+    	        }
 
-        	       }catch(JSONException e)        {
-        	       	 Log.e(TAG, "Error parsing data "+e.toString());
-        	       }catch(NullPointerException e) {
-        	    	   
-        	    	 Log.e(TAG, "null from json "+e.toString());
-                     Context context = ComicListFragment.this.getActivity().getApplicationContext();
+    	       }catch(JSONException e)        {
+    	       	 Log.e(TAG, "Error parsing data "+e.toString());
+    	       }catch(NullPointerException e) {
+    	    	   
+    	    	 Log.e(TAG, "null from json "+e.toString());
+    	       }
+       		return comiclist;
 
-        	    	 Toast.makeText(context, "Error fetching data!", Toast.LENGTH_SHORT).show();
-        	       }
-           		return comiclist;
-
-    		    /*ListAdapter adapter = new SimpleAdapter(this, mylist , R.layout.simple_list_item_activated_1,
-    		            new String[] { "name" },
-    		            new int[] { R.id.text1 });
-        	       
-    			setListAdapter(adapter);
-    						*/
-
-    			//final ListView lv = getListView();
-    			/*lv.setOnItemClickListener(new OnItemClickListener() {
-    			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    				@SuppressWarnings("unchecked")
-    				HashMap<String, String> o = (HashMap<String, String>) lv.getItemAtPosition(position);
-    				Toast.makeText(Main.this, "ID '" + o.get("id") + "' was clicked.", Toast.LENGTH_SHORT).show(); 
-    			
-    			}
-    			});*/      
            }
-
-
-        /*protected void onProgressUpdate(Integer... progress) {
-            setProgressPercent(progress[0]);
-        }*/
 
         protected void onPostExecute(ArrayList<HashMap<String, String>> mylist) {
         	ArrayList<String> clist = new ArrayList<String>();
-        	for(HashMap hm: mylist) {
+        	for(HashMap<String, String> hm: mylist) {
         		clist.add((String) hm.get("name"));
         	}
             Context context = ComicListFragment.this.getActivity().getApplicationContext();
