@@ -1,8 +1,40 @@
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+ <TextView android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:layout_alignParentLeft="true" 
+    android:id="@+id/comic_title" 
+    android:text="Title" 
+    android:layout_alignParentTop="true" 
+    android:textAppearance="?android:attr/textAppearanceSmall"/>
+ 
+ <TextView android:layout_height="wrap_content" 
+    android:layout_width="wrap_content" 
+    android:layout_alignParentRight="true" 
+    android:id="@+id/comic_date" 
+    android:text="Date" 
+    android:layout_alignParentTop="true" 
+    android:textAppearance="?android:attr/textAppearanceSmall"/>
+ 
+        
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     style="?android:attr/textAppearanceLarge"
-    android:id="@+id/comic_detail"
+    android:id="@+id/comic_image"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
     tools:context=".ComicDetailFragment" />
+
+<TextView
+    android:id="@+id/comic_info"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentLeft="true"
+    android:text="Image Caption"
+    android:textAppearance="?android:attr/textAppearanceSmall" />
+        
+    </RelativeLayout>
