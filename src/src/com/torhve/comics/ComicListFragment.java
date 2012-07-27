@@ -1,7 +1,5 @@
 package com.torhve.comics;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -121,19 +119,11 @@ public class ComicListFragment extends ListFragment {
 
     private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
 		protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
-			URL url = null;
-			Log.d("JSON fetching URL:", params[0]);
-			   try {
-				url = new URL(params[0]);
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				Log.d("MalformedRL:", e1.toString());
-			}
         	comiclist = new ArrayList<HashMap<String, String>>();
 
         	//Get the data (see above)
         	JSONObject json =
-        		JasonHandler.getJSONfromURL(url);
+        		JasonHandler.getJSONfromURL(params[0]);
 
            try{
         	   Log.d("JSON", json.toString());
@@ -147,14 +137,6 @@ public class ComicListFragment extends ListFragment {
     	        	map.put("name", c.getString("name"));
 
     	        	comiclist.add(map);
-
-    	        	/*HashMap<String, String> map = new HashMap<String, String>();
-    	        	JSONObject e = earthquakes.getJSONObject(i);
-
-    	        	map.put("id",  String.valueOf(i));
-    	        	map.put("name", "Earthquake name:" + e.getString("eqid"));
-    	        	map.put("magnitude", "Magnitude: " +  e.getString("magnitude"));
-    	        	mylist.add(map);*/
     	        }
 
     	       }catch(JSONException e)        {

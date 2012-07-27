@@ -16,6 +16,7 @@
     android:id="@+id/comic_date" 
     android:text="Date" 
     android:layout_alignParentTop="true" 
+    android:scaleType="fitXY"
     android:textAppearance="?android:attr/textAppearanceSmall"/>
  
         

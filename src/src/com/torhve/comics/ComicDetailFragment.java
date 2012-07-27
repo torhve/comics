@@ -1,8 +1,6 @@
 package com.torhve.comics;
 
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -75,21 +73,13 @@ public class ComicDetailFragment extends Fragment implements OnClickListener {
     private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
 		protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
 			Log.d("JSON fetching URL:", params[0]);
-			URL url = null;
-			   try {
-				url = new URL(params[0]);
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				Log.d("MalformedRL:", e1.toString());
-			}
-
         	
         	comiclist = new ArrayList<HashMap<String, String>>();
         	//ArrayList<long<String>> mylist2 = new ArrayList<long<String>>();
 
         	//Get the data (see above)
         	JSONObject json =
-        		JasonHandler.getJSONfromURL(url);
+        		JasonHandler.getJSONfromURL(params[0]);
 
            try{
         		//Get the element that holds the earthquakes ( JSONArray )

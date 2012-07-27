@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.json.JSONException;
@@ -19,7 +20,15 @@ import android.util.Log;
 public class JasonHandler {
 	private static final String TAG = "JasonHandler";
 
-	public static JSONObject getJSONfromURL(URL url) {
+	public static JSONObject getJSONfromURL(String sUrl) {
+		URL url = null;
+		try {
+			url = new URL(sUrl);
+		} catch (MalformedURLException e2) {
+			Log.e(TAG, "Malformed URL:"+sUrl);
+			e2.printStackTrace();
+			return null;
+		}
 
 		// initialize
 		JSONObject jArray = null;
