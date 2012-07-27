@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -18,7 +19,7 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 public class ComicListActivity extends FragmentActivity
-        implements ComicListFragment.Callbacks {
+        implements ComicListFragment.Callbacks, OnSharedPreferenceChangeListener {
 
 	private boolean mTwoPane;
 	private String APIKEY;
@@ -143,6 +144,13 @@ public class ComicListActivity extends FragmentActivity
 
 	public String getBaseUrl() {
 		return this.BASEURL;
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
+		Log.d(TAG, "onSharedPrefChanged");
+		this.recreate();
 	}
 
 
