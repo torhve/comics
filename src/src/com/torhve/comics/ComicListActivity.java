@@ -85,7 +85,7 @@ public class ComicListActivity extends FragmentActivity
 
     private void enableHttpResponseCache() {
         try {
-            long httpCacheSize = 10 * 1024 * 1024; // 10 MiB
+            long httpCacheSize = 100 * 1024 * 1024; // 100 MiB
             File httpCacheDir = new File(getCacheDir(), "http");
             Class.forName("android.net.http.HttpResponseCache")
                 .getMethod("install", File.class, long.class)
@@ -141,17 +141,15 @@ public class ComicListActivity extends FragmentActivity
     }
     
     public String getApiKey() { return this.APIKEY; }
-
-	public String getBaseUrl() {
-		return this.BASEURL;
-	}
+	public String getBaseUrl() { return this.BASEURL;	}
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
-		Log.d(TAG, "onSharedPrefChanged");
-		this.recreate();
+		Log.d(TAG, "onSharedPrefChanged key:" + key);
+		// Just recreate the app if the settings changed
+		// TODO make this smart/better
+		if(key.equals("apikey") || key.equals("urlbase") )
+			this.recreate();
 	}
-
-
 }

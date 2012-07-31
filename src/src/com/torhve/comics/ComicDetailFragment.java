@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.torhve.comics.backend.ComicMeta;
 import com.torhve.comics.backend.JasonHandler;
 
 public class ComicDetailFragment extends Fragment implements OnClickListener, OnPageChangeListener {
@@ -51,6 +52,7 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
     private Context cxt;
     private AwesomePagerAdapter awesomeAdapter;
 	private View rootView;
+	private ComicMeta meta;
 
 
     public ComicDetailFragment() {
@@ -63,13 +65,11 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
             String APIKEY = ((ComicListActivity) getActivity()).getApiKey();
             baseurl = ((ComicListActivity) getActivity()).getBaseUrl();
             String itemId = getArguments().getString(ARG_ITEM_ID);
-            if(APIKEY!=null && baseurl != null)
+            meta = new ComicMeta(getActivity().getBaseContext());
+            if(APIKEY!=null && baseurl != null) {
             	new FetchAndUpdate().execute(baseurl + "/api/v1/releases/?format=json&my=true&key=" + APIKEY + "&comic=" + itemId);
+            }
         }
-
-
-
-
     }
 
     @Override
@@ -84,6 +84,9 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
         firstButton.setOnClickListener(this);
         Button lastButton = ((Button) rootView.findViewById(R.id.goto_last));
         lastButton.setOnClickListener(this);
+        ((Button) rootView.findViewById(R.id.goto_latest)).setOnClickListener(this);
+        
+
         
         return rootView;
     }
@@ -130,7 +133,7 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
 		    dateView.setText(hm.get("pub_date"));
 		   
 			// Fetch image and update image view
-			new DownloadImageTask((ImageView) imageView).execute(imgurl);
+			new DownloadImageTask((ImageView) imageView, getArguments().getString(ARG_ITEM_ID), Long.parseLong(hm.get("id"))).execute(imgurl);
             return layout;
         }
         
@@ -182,22 +185,21 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
 
 }
 
-
-
-
     private class FetchAndUpdate extends AsyncTask<String, Void, ArrayList<HashMap<String, String>>> {
 		protected ArrayList<HashMap<String, String>> doInBackground(String... params) {
 			Log.d("JSON fetching URL:", params[0]);
         	
         	comiclist = new ArrayList<HashMap<String, String>>();
-        	//ArrayList<long<String>> mylist2 = new ArrayList<long<String>>();
+        	// Get the the current comic ID
+        	String comicId = getArguments().getString(ARG_ITEM_ID);
+        	// Get the last read comic
+        	Long latest = meta.getLatest(comicId);
 
         	//Get the data (see above)
         	JSONObject json =
         		JasonHandler.getJSONfromURL(params[0]);
 
            try{
-        		//Get the element that holds the earthquakes ( JSONArray )
         	   Log.d("JSON", json.toString());
         	   ComicDetailFragment.this.nextUrl = json.getJSONObject("meta").getString("next");
         	   JSONArray comics = json.getJSONArray("objects");
@@ -214,7 +216,13 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
         	        	map.put("file", iobj.getString("file"));
         	        	map.put("title", iobj.getString("title"));
         	        	map.put("text", iobj.getString("text"));
-
+        	        	
+        	        	// Handle latest
+        	        	if(latest == 0) {
+        	        		latest = Long.parseLong(c.getString("id"));
+        	        		meta.setLatest(comicId, latest);
+        	        	}
+        	        	
         	        	comiclist.add(map);
         	        }
         	       }catch(JSONException e)        {
@@ -236,39 +244,15 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
             awesomeAdapter.notifyDataSetChanged();
         }
     }
-   /* public void getAndSetNextImage(ArrayList<HashMap<String, String>> mylist) {
-    	// Get the current HashMap
-    	try {
-			HashMap<String, String> hm = mylist.get(currentPosition);
-			String imgurl = hm.get("file");
-		
-			// Fetch image and update image view
-			new DownloadImageTask((ImageView) imageView).execute(imgurl);
-		
-		    titleView.setText(hm.get("title"));        
-		    infoView.setText(hm.get("text"));
-		    dateView.setText(hm.get("pub_date"));
-		    
-			if(currentPosition+1 < mylist.size()) {
-				// TODO fetch more
-				this.currentPosition++;
-			}else { 
-		    	new FetchAndUpdate().execute(baseurl + nextUrl);
-		    	currentPosition = 0;
-		    }
-    	}catch(IndexOutOfBoundsException e) {
-    		// Probably during update of new list
-    		Log.d(TAG, e.toString());
-    		Log.d(TAG, "Position:"+currentPosition+",size:"+mylist.size());
-    	}
-
-	}
-	*/
 	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
 		ImageView bmImage;
+		String comicId;
+		Long stripId;
 
-    	public DownloadImageTask(ImageView bmImage) {
+    	public DownloadImageTask(ImageView bmImage, String comicId, Long stripId) {
 	    	this.bmImage = bmImage;
+	    	this.comicId = comicId;
+	    	this.stripId = stripId;
     	}
 
     	protected Bitmap doInBackground(String... urls) {
@@ -286,24 +270,42 @@ public class ComicDetailFragment extends Fragment implements OnClickListener, On
 	
     	protected void onPostExecute(Bitmap result) {
     		bmImage.setImageBitmap(result);
+    		// Handle latest
+    		Long storedLatest = meta.getLatest(comicId);
+    		if(stripId > storedLatest) {
+    			meta.setLatest(comicId, stripId);
+    		}
     	}
 	   	
     }
 	@Override
 	public void onClick(View view) {
-		//this.getAndSetNextImage(comiclist);
-		if(view.getId() == R.id.goto_first) {
+		if (view.getId() == R.id.goto_latest) {
+	    	// Find the latest ID and select it
+        	
+        	// Get the the current comic ID
+        	String comicId = getArguments().getString(ARG_ITEM_ID);
+        	// Get the last read comic
+        	Long latest = meta.getLatest(comicId);
+        	Log.d(TAG, "latest:"+latest);
+        	for(int i=0;i<comiclist.size();i++) {
+        		Log.d(TAG, "comcic:"+comiclist.get(i).get("id"));
+        		if(comiclist.get(i).get("id").equals(Long.toString(latest))){
+        			awesomePager.setCurrentItem(i,true);
+        			return;
+        		}      			
+        	}
+	    }
+		else if(view.getId() == R.id.goto_first) {
 			awesomePager.setCurrentItem(0, true);
-		}else if (view.getId() == R.id.goto_last) {
+		}
+		else if (view.getId() == R.id.goto_last) {
 			if (awesomePager.getCurrentItem() == awesomeAdapter.getCount()-1) {
 				new FetchAndUpdate().execute(baseurl + nextUrl);
 			}else {
 				awesomePager.setCurrentItem(awesomeAdapter.getCount()-1,true);
 			}
-			
-		}
-			
-
+	    }
 	}
 
 	@Override

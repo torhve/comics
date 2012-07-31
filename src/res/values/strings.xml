@@ -5,6 +5,7 @@
     <string name="title_comic_list">Strips</string>
     <string name="first">First</string>
     <string name="last">Last</string>
+    <string name="latest">Goto last read</string>
     <string name="fetch_more">Fetch more</string>
     
 
